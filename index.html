@@ -2,77 +2,304 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>客製化花束小幫手</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阿桑的選花小幫手</title>
     <style>
-        body { background-color: #ffdce6; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; color: #5c4d50; }
-        .app-container { width: 100%; max-width: 500px; background: white; border: 3px solid #ff9eb8; padding: 15px; border-radius: 8px; box-shadow: 5px 5px 0px #e68fa6; }
-        
-        .card { border: 2px solid #ff9eb8; padding: 15px; margin-bottom: 15px; background: #fffdfd; }
-        h2 { font-size: 16px; border-bottom: 2px solid #ff9eb8; padding-bottom: 5px; color: #d67b91; margin-top: 0; }
-        
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .item { border: 2px solid #ff9eb8; padding: 5px; text-align: center; cursor: pointer; }
-        .item.selected { background-color: #ffdae2; }
-        .item img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border: 1px solid #ff9eb8; display: block; }
-        .item p { font-size: 12px; margin: 5px 0 0 0; }
+        body {
+            background-color: #ffdce6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+            color: #5c4d50;
+            margin: 0;
+        }
 
-        textarea { width: 100%; height: 100px; border: 2px solid #ff9eb8; margin-top: 10px; padding: 10px; box-sizing: border-box; }
-        button { width: 100%; background: #d67b91; color: white; border: none; padding: 10px; margin-top: 10px; cursor: pointer; font-weight: bold; }
+        /* 視窗外框風格 */
+        .window-container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border: 3px solid #e68fa6;
+            box-shadow: 6px 6px 0px rgba(213, 123, 145, 0.4);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        /* 視窗標題列 */
+        .window-header {
+            background-color: #d67b91;
+            color: white;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .window-buttons span {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background: white;
+            border: 1px solid #b3566d;
+            margin-left: 4px;
+            text-align: center;
+            line-height: 12px;
+            font-size: 10px;
+            color: #d67b91;
+            cursor: pointer;
+        }
+
+        /* 頁籤導覽列 */
+        .tab-bar {
+            display: flex;
+            background-color: #f7c5d1;
+            border-bottom: 3px solid #e68fa6;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 6px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: #7a5c63;
+            background: #f7c5d1;
+            border: none;
+            border-right: 2px solid #e68fa6;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #d67b91;
+            border-bottom: 3px solid white;
+            margin-bottom: -3px;
+        }
+
+        /* 頁面內容區 */
+        .tab-content {
+            display: none;
+            padding: 15px;
+            background: #fffdfd;
+            min-height: 400px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            border: 2px solid #ff9eb8;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: white;
+        }
+
+        h3 {
+            font-size: 14px;
+            border-bottom: 2px solid #ff9eb8;
+            padding-bottom: 5px;
+            color: #d67b91;
+            margin-top: 0;
+        }
+
+        /* 正方形圖片網格 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .item {
+            border: 2px solid #ff9eb8;
+            padding: 5px;
+            text-align: center;
+            cursor: pointer;
+            background: white;
+        }
+
+        .item.selected {
+            background-color: #ffdae2;
+        }
+
+        .item img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border: 1px solid #ff9eb8;
+            display: block;
+        }
+
+        .item p {
+            font-size: 12px;
+            margin: 5px 0 0 0;
+        }
+
+        textarea {
+            width: 100%;
+            height: 90px;
+            border: 2px solid #ff9eb8;
+            margin-top: 10px;
+            padding: 8px;
+            box-sizing: border-box;
+            font-size: 13px;
+        }
+
+        .action-btn {
+            width: 100%;
+            background: #d67b91;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .action-btn:hover {
+            background: #c26a80;
+        }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="card">
-        <h2>🌸 選擇花朵 (選5支)</h2>
-        <div class="grid" id="flower-grid"></div>
+<div class="window-container">
+    <!-- 視窗標題列 -->
+    <div class="window-header">
+        <span>♥ 阿桑的選花小幫手 v1.995</span>
+        <div class="window-buttons">
+            <span>_</span><span>□</span><span>×</span>
+        </div>
     </div>
-    <div class="card">
-        <h2>🎀 選擇蝴蝶結</h2>
-        <div class="grid" id="bow-grid"></div>
+
+    <!-- 頁籤列 -->
+    <div class="tab-bar">
+        <button class="tab-btn" onclick="switchTab(0)">🍀歡迎光臨🍀</button>
+        <button class="tab-btn active" onclick="switchTab(1)">🌸花朵選擇🌸</button>
+        <button class="tab-btn" onclick="switchTab(2)">✨作品展示✨</button>
+        <button class="tab-btn" onclick="switchTab(3)">⚙️</button>
     </div>
-    <div class="card">
-        <h2>🏺 選擇玻璃瓶</h2>
-        <div class="grid" id="bottle-grid"></div>
+
+    <!-- 頁籤 0：歡迎光臨 -->
+    <div class="tab-content" id="tab-0">
+        <div class="card" style="text-align: center; padding: 30px 10px;">
+            <h2 style="color: #d67b91; margin-top: 0;">✨ 歡迎來到客製化花束小幫手 ✨</h2>
+            <p style="font-size: 13px; line-height: 1.6;">請點擊上方 **「🌸花朵選擇🌸」** 開始挑選你喜歡的花朵、蝴蝶結與玻璃瓶，完成後一鍵複製文字傳給闆娘即可！💕</p>
+            <button class="action-btn" onclick="switchTab(1)">馬上開始選花</button>
+        </div>
     </div>
-    <div class="card">
-        <h2>✨ 訂購文字</h2>
-        <textarea id="output" readonly></textarea>
-        <button onclick="copyText()">複製文字傳給闆娘</button>
+
+    <!-- 頁籤 1：花朵選擇 -->
+    <div class="tab-content active" id="tab-1">
+        <div class="card">
+            <h3>🌸 選擇花朵 (最多選5支)</h3>
+            <div class="grid" id="flower-grid"></div>
+        </div>
+        <div class="card">
+            <h3>🎀 選擇蝴蝶結 (單選)</h3>
+            <div class="grid" id="bow-grid"></div>
+        </div>
+        <div class="card">
+            <h3>🏺 選擇玻璃瓶 (單選)</h3>
+            <div class="grid" id="bottle-grid"></div>
+        </div>
+        <div class="card">
+            <h3>✨ 您的訂購文字</h3>
+            <textarea id="output" readonly></textarea>
+            <button class="action-btn" onclick="copyText()">一鍵複製訂購文字</button>
+        </div>
+    </div>
+
+    <!-- 頁籤 2：作品展示 -->
+    <div class="tab-content" id="tab-2">
+        <div class="card">
+            <h3>✨ 精選作品參考</h3>
+            <div class="grid">
+                <div class="item"><img src="https://picsum.photos/200?random=101"><p>範例作品 1</p></div>
+                <div class="item"><img src="https://picsum.photos/200?random=102"><p>範例作品 2</p></div>
+                <div class="item"><img src="https://picsum.photos/200?random=103"><p>範例作品 3</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 頁籤 3：設定/其他 -->
+    <div class="tab-content" id="tab-3">
+        <div class="card">
+            <h3>⚙️ 關於小幫手</h3>
+            <p style="font-size: 13px;">如果有任何客製化疑問，歡迎直接截圖選好的畫面私訊討論唷！</p>
+        </div>
     </div>
 </div>
 
 <script>
+    // 切換頁籤功能
+    function switchTab(index) {
+        const contents = document.querySelectorAll('.tab-content');
+        const buttons = document.querySelectorAll('.tab-btn');
+        
+        contents.forEach((c, i) => {
+            c.classList.toggle('active', i === index);
+        });
+        buttons.forEach((b, i) => {
+            b.classList.toggle('active', i === index);
+        });
+    }
+
+    // 動態生成選單項目（正方形圖片框）
     const createItems = (count, prefix, containerId, isMulti) => {
         const container = document.getElementById(containerId);
-        for(let i=1; i<=count; i++) {
+        for(let i = 1; i <= count; i++) {
             let div = document.createElement('div');
             div.className = 'item';
-            div.innerHTML = `<img src="https://picsum.photos/200?random=${i+prefix}"><p>${prefix}${i}號</p>`;
+            div.innerHTML = `<img src="https://picsum.photos/200?random=${i + prefix}"><p>${i}號</p>`;
+            
             div.onclick = () => {
-                div.classList.toggle('selected');
+                if (isMulti) {
+                    div.classList.toggle('selected');
+                } else {
+                    // 單選邏輯：同區塊只能選一個
+                    container.querySelectorAll('.item').forEach(el => el.classList.remove('selected'));
+                    div.classList.add('selected');
+                }
                 updateText();
             };
             container.appendChild(div);
         }
     };
 
+    // 更新輸出文字
     function updateText() {
-        let flowers = Array.from(document.querySelectorAll('#flower-grid .selected')).map(el => el.innerText.replace('花','').replace('號',''));
-        let bow = document.querySelector('#bow-grid .selected')?.innerText.replace('蝴蝶結','').replace('號','');
-        let bottle = document.querySelector('#bottle-grid .selected')?.innerText.replace('玻璃瓶','').replace('號','');
-        document.getElementById('output').value = `我想要這些花${flowers.join(',')}\n蝴蝶結要${bow||'？'}號\n玻璃瓶要${bottle||'？'}號\n謝謝你!`;
+        let flowers = Array.from(document.querySelectorAll('#flower-grid .selected')).map(el => el.querySelector('p').innerText.replace('號',''));
+        let bow = document.querySelector('#bow-grid .selected')?.querySelector('p').innerText.replace('號','');
+        let bottle = document.querySelector('#bottle-grid .selected')?.querySelector('p').innerText.replace('號','');
+        
+        let flowerStr = flowers.length > 0 ? flowers.join(',') : '...';
+        let bowStr = bow ? `${bow}號` : '...';
+        let bottleStr = bottle ? `${bottle}號` : '...';
+
+        document.getElementById('output').value = `我想要這些花${flowerStr}\n蝴蝶結要${bowStr}\n玻璃瓶要${bottleStr}\n謝謝你!`;
     }
 
+    // 複製文字
     function copyText() {
-        document.getElementById('output').select();
+        const textarea = document.getElementById('output');
+        textarea.select();
         document.execCommand('copy');
-        alert('已複製！');
+        alert('已成功複製訂購文字！快傳給闆娘吧 💕');
     }
 
-    createItems(15, '花', 'flower-grid');
-    createItems(4, '蝴蝶結', 'bow-grid');
-    createItems(4, '玻璃瓶', 'bottle-grid');
+    // 初始化項目 (15朵花, 4個蝴蝶結, 4個玻璃瓶)
+    createItems(15, 'f', 'flower-grid', true);   // 花朵可多選
+    createItems(4, 'b', 'bow-grid', false);      // 蝴蝶結單選
+    createItems(4, 'v', 'bottle-grid', false);   // 玻璃瓶單選
+    updateText();
 </script>
+
 </body>
 </html>
