@@ -224,7 +224,7 @@
         <button class="tab-btn" onclick="switchTab(0)">🍀歡迎光臨🍀</button>
         <button class="tab-btn active" onclick="switchTab(1)">🌸花朵選擇🌸</button>
         <button class="tab-btn" onclick="switchTab(2)">✨作品展示✨</button>
-        <button class="tab-btn" onclick="switchTab(3)" id="gear-tab-btn">⚙️</button>
+        <button class="tab-btn" onclick="switchTab(3)">⚙️</button>
     </div>
 
     <!-- 頁籤 0：歡迎光臨 -->
@@ -261,11 +261,7 @@
     <div class="tab-content" id="tab-2">
         <div class="card">
             <h3>✨ 精選作品參考</h3>
-            <div class="grid">
-                <div class="item"><img src="https://picsum.photos/200?random=101"><p>範例作品 1</p></div>
-                <div class="item"><img src="https://picsum.photos/200?random=102"><p>範例作品 2</p></div>
-                <div class="item"><img src="https://picsum.photos/200?random=103"><p>範例作品 3</p></div>
-            </div>
+            <div class="grid" id="portfolio-grid"></div>
         </div>
     </div>
 
@@ -279,27 +275,45 @@
         </div>
 
         <div id="admin-panel" style="display: none;">
+            <!-- 花朵與庫存管理 -->
             <div class="card">
                 <h3>🌸 花朵商品與庫存管理</h3>
                 <div style="margin-bottom: 10px; display: flex; gap: 5px;">
-                    <input type="text" id="new-name" placeholder="花朵名稱/編號" style="flex:1; padding:5px; border:1px solid #ff9eb8;">
+                    <input type="text" id="new-name" placeholder="名稱/編號" style="flex:1; padding:5px; border:1px solid #ff9eb8;">
                     <input type="text" id="new-img" placeholder="圖片網址" style="flex:1; padding:5px; border:1px solid #ff9eb8;">
                     <button class="action-btn" style="margin:0; width:auto; padding:5px 10px;" onclick="addFlower()">新增</button>
                 </div>
                 <div id="admin-flower-list"></div>
+            </div>
+
+            <!-- 作品展示管理 -->
+            <div class="card">
+                <h3>✨ 作品展示區圖片管理</h3>
+                <div style="margin-bottom: 10px; display: flex; gap: 5px;">
+                    <input type="text" id="new-p-title" placeholder="作品名稱" style="flex:1; padding:5px; border:1px solid #ff9eb8;">
+                    <input type="text" id="new-p-img" placeholder="圖片網址" style="flex:1; padding:5px; border:1px solid #ff9eb8;">
+                    <button class="action-btn" style="margin:0; width:auto; padding:5px 10px;" onclick="addPortfolio()">新增</button>
+                </div>
+                <div id="admin-portfolio-list"></div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // 預設花朵資料（包含庫存 stock，若 stock 為 0 則顯示灰階）
+    // 資料初始化 (儲存於瀏覽器 localStorage)
     let flowers = JSON.parse(localStorage.getItem('flowers_data')) || [
         { id: 1, name: '1號', img: 'https://picsum.photos/200?random=1', stock: 5 },
         { id: 2, name: '2號', img: 'https://picsum.photos/200?random=2', stock: 5 },
-        { id: 3, name: '3號', img: 'https://picsum.photos/200?random=3', stock: 0 }, // 庫存為0範例
+        { id: 3, name: '3號', img: 'https://picsum.photos/200?random=3', stock: 0 },
         { id: 4, name: '4號', img: 'https://picsum.photos/200?random=4', stock: 3 },
         { id: 5, name: '5號', img: 'https://picsum.photos/200?random=5', stock: 2 }
+    ];
+
+    let portfolio = JSON.parse(localStorage.getItem('portfolio_data')) || [
+        { id: 1, title: '範例作品 1', img: 'https://picsum.photos/200?random=101' },
+        { id: 2, title: '範例作品 2', img: 'https://picsum.photos/200?random=102' },
+        { id: 3, title: '範例作品 3', img: 'https://picsum.photos/200?random=103' }
     ];
 
     const bows = [
@@ -321,13 +335,8 @@
     let selectedBottle = null;
 
     function switchTab(index) {
-        if (index === 3) {
-            // 點擊齒輪時若未登入，強制停留在登入畫面
-            // 允許直接切換過去看密碼框
-        }
         const contents = document.querySelectorAll('.tab-content');
         const buttons = document.querySelectorAll('.tab-btn');
-        
         contents.forEach((c, i) => c.classList.toggle('active', i === index));
         buttons.forEach((b, i) => b.classList.toggle('active', i === index));
     }
@@ -337,13 +346,13 @@
         if (pwd === '861001') {
             document.getElementById('login-box').style.display = 'none';
             document.getElementById('admin-panel').style.display = 'block';
-            renderAdminList();
+            renderAdminLists();
         } else {
             alert('密碼錯誤唷！');
         }
     }
 
-    // 渲染前端選單
+    // 渲染前端選單與作品
     function renderShop() {
         // 花朵
         const fContainer = document.getElementById('flower-grid');
@@ -404,29 +413,54 @@
             vContainer.appendChild(div);
         });
 
+        // 作品展示
+        const pContainer = document.getElementById('portfolio-grid');
+        pContainer.innerHTML = '';
+        portfolio.forEach(p => {
+            let div = document.createElement('div');
+            div.className = 'item';
+            div.innerHTML = `<img src="${p.img}"><p>${p.title}</p>`;
+            pContainer.appendChild(div);
+        });
+
         updateText();
     }
 
     // 渲染後台管理清單
-    function renderAdminList() {
-        const list = document.getElementById('admin-flower-list');
-        list.innerHTML = '';
+    function renderAdminLists() {
+        // 花朵清單
+        const fList = document.getElementById('admin-flower-list');
+        fList.innerHTML = '';
         flowers.forEach((f, index) => {
             let row = document.createElement('div');
             row.className = 'admin-row';
             row.innerHTML = `
                 <img src="${f.img}">
-                <input type="text" value="${f.name}" id="name-${index}" onchange="updateFlower(${index})">
-                <input type="number" value="${f.stock}" id="stock-${index}" title="庫存" onchange="updateFlower(${index})" min="0">
+                <input type="text" value="${f.name}" id="f-name-${index}" onchange="updateFlower(${index})">
+                <input type="number" value="${f.stock}" id="f-stock-${index}" title="庫存" onchange="updateFlower(${index})" min="0">
                 <button class="del-btn" onclick="deleteFlower(${index})">刪除</button>
             `;
-            list.appendChild(row);
+            fList.appendChild(row);
+        });
+
+        // 作品展示清單
+        const pList = document.getElementById('admin-portfolio-list');
+        pList.innerHTML = '';
+        portfolio.forEach((p, index) => {
+            let row = document.createElement('div');
+            row.className = 'admin-row';
+            row.innerHTML = `
+                <img src="${p.img}">
+                <input type="text" value="${p.title}" id="p-title-${index}" onchange="updatePortfolio(${index})">
+                <button class="del-btn" onclick="deletePortfolio(${index})">刪除</button>
+            `;
+            pList.appendChild(row);
         });
     }
 
     function updateFlower(index) {
-        flowers[index].name = document.getElementById(`name-${index}`).value;
-        flowers[index].stock = parseInt(document.getElementById(`stock-${index}`).value) || 0;
+        flowers[index].name = document.getElementById(`f-name-${index}`).value;
+        flowers[index].stock = parseInt(document.getElementById(`f-stock-${index}`).value) || 0;
         localStorage.setItem('flowers_data', JSON.stringify(flowers));
         renderShop();
     }
@@ -435,7 +469,7 @@
         if (confirm('確定要刪除這款花嗎？')) {
             flowers.splice(index, 1);
             localStorage.setItem('flowers_data', JSON.stringify(flowers));
-            renderAdminList();
+            renderAdminLists();
             renderShop();
         }
     }
@@ -451,7 +485,37 @@
         localStorage.setItem('flowers_data', JSON.stringify(flowers));
         document.getElementById('new-name').value = '';
         document.getElementById('new-img').value = '';
-        renderAdminList();
+        renderAdminLists();
+        renderShop();
+    }
+
+    function updatePortfolio(index) {
+        portfolio[index].title = document.getElementById(`p-title-${index}`).value;
+        localStorage.setItem('portfolio_data', JSON.stringify(portfolio));
+        renderShop();
+    }
+
+    function deletePortfolio(index) {
+        if (confirm('確定要刪除這個作品嗎？')) {
+            portfolio.splice(index, 1);
+            localStorage.setItem('portfolio_data', JSON.stringify(portfolio));
+            renderAdminLists();
+            renderShop();
+        }
+    }
+
+    function addPortfolio() {
+        let title = document.getElementById('new-p-title').value;
+        let img = document.getElementById('new-p-img').value || 'https://picsum.photos/200';
+        if (!title) {
+            alert('請輸入作品名稱！');
+            return;
+        }
+        portfolio.push({ id: Date.now(), title: title, img: img });
+        localStorage.setItem('portfolio_data', JSON.stringify(portfolio));
+        document.getElementById('new-p-title').value = '';
+        document.getElementById('new-p-img').value = '';
+        renderAdminLists();
         renderShop();
     }
 
