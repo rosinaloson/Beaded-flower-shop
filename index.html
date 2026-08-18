@@ -15,7 +15,6 @@
             margin: 0;
         }
 
-        /* 視窗外框風格 */
         .window-container {
             width: 100%;
             max-width: 500px;
@@ -26,7 +25,6 @@
             overflow: hidden;
         }
 
-        /* 視窗標題列 */
         .window-header {
             background-color: #d67b91;
             color: white;
@@ -52,7 +50,6 @@
             cursor: pointer;
         }
 
-        /* 頁籤導覽列 */
         .tab-bar {
             display: flex;
             background-color: #f7c5d1;
@@ -81,7 +78,6 @@
             margin-bottom: -3px;
         }
 
-        /* 頁面內容區 */
         .tab-content {
             display: none;
             padding: 15px;
@@ -108,7 +104,6 @@
             margin-top: 0;
         }
 
-        /* 正方形圖片網格 */
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -121,6 +116,7 @@
             text-align: center;
             cursor: pointer;
             background: white;
+            position: relative;
         }
 
         .item.selected {
@@ -133,6 +129,16 @@
             object-fit: cover;
             border: 1px solid #ff9eb8;
             display: block;
+        }
+
+        /* 庫存為0時，圖片變淺灰色 */
+        .item.out-of-stock img {
+            filter: grayscale(100%) brightness(150%);
+            opacity: 0.5;
+        }
+        .item.out-of-stock {
+            background-color: #f2f2f2;
+            border-color: #ccc;
         }
 
         .item p {
@@ -165,12 +171,48 @@
         .action-btn:hover {
             background: #c26a80;
         }
+
+        /* 後台管理樣式 */
+        .admin-row {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+            align-items: center;
+            background: #fff5f7;
+            padding: 6px;
+            border: 1px solid #ff9eb8;
+        }
+        .admin-row img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border: 1px solid #ccc;
+        }
+        .admin-row input[type="text"] {
+            flex: 1;
+            padding: 4px;
+            border: 1px solid #ff9eb8;
+            font-size: 12px;
+        }
+        .admin-row input[type="number"] {
+            width: 50px;
+            padding: 4px;
+            border: 1px solid #ff9eb8;
+            font-size: 12px;
+        }
+        .del-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
 
 <div class="window-container">
-    <!-- 視窗標題列 -->
     <div class="window-header">
         <span>♥ 阿桑的選花小幫手 v1.995</span>
         <div class="window-buttons">
@@ -178,12 +220,11 @@
         </div>
     </div>
 
-    <!-- 頁籤列 -->
     <div class="tab-bar">
         <button class="tab-btn" onclick="switchTab(0)">🍀歡迎光臨🍀</button>
         <button class="tab-btn active" onclick="switchTab(1)">🌸花朵選擇🌸</button>
         <button class="tab-btn" onclick="switchTab(2)">✨作品展示✨</button>
-        <button class="tab-btn" onclick="switchTab(3)">⚙️</button>
+        <button class="tab-btn" onclick="switchTab(3)" id="gear-tab-btn">⚙️</button>
     </div>
 
     <!-- 頁籤 0：歡迎光臨 -->
@@ -228,65 +269,200 @@
         </div>
     </div>
 
-    <!-- 頁籤 3：設定/其他 -->
+    <!-- 頁籤 3：員工後台管理 -->
     <div class="tab-content" id="tab-3">
-        <div class="card">
-            <h3>⚙️ 關於小幫手</h3>
-            <p style="font-size: 13px;">如果有任何客製化疑問，歡迎直接截圖選好的畫面私訊討論唷！</p>
+        <div id="login-box" class="card" style="text-align: center; padding: 30px 10px;">
+            <p style="font-weight: bold; color: #d67b91; font-size: 14px;">員工專用非請勿進🥺</p>
+            <input type="password" id="admin-pwd" placeholder="請輸入密碼" style="padding: 8px; border: 2px solid #ff9eb8; width: 60%; margin-bottom: 10px;">
+            <br>
+            <button class="action-btn" style="width: 70%;" onclick="checkPassword()">登入後台</button>
+        </div>
+
+        <div id="admin-panel" style="display: none;">
+            <div class="card">
+                <h3>🌸 花朵商品與庫存管理</h3>
+                <div style="margin-bottom: 10px; display: flex; gap: 5px;">
+                    <input type="text" id="new-name" placeholder="花朵名稱/編號" style="flex:1; padding:5px; border:1px solid #ff9eb8;">
+                    <input type="text" id="new-img" placeholder="圖片網址" style="flex:1; padding:5px; border:1px solid #ff9eb8;">
+                    <button class="action-btn" style="margin:0; width:auto; padding:5px 10px;" onclick="addFlower()">新增</button>
+                </div>
+                <div id="admin-flower-list"></div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // 切換頁籤功能
+    // 預設花朵資料（包含庫存 stock，若 stock 為 0 則顯示灰階）
+    let flowers = JSON.parse(localStorage.getItem('flowers_data')) || [
+        { id: 1, name: '1號', img: 'https://picsum.photos/200?random=1', stock: 5 },
+        { id: 2, name: '2號', img: 'https://picsum.photos/200?random=2', stock: 5 },
+        { id: 3, name: '3號', img: 'https://picsum.photos/200?random=3', stock: 0 }, // 庫存為0範例
+        { id: 4, name: '4號', img: 'https://picsum.photos/200?random=4', stock: 3 },
+        { id: 5, name: '5號', img: 'https://picsum.photos/200?random=5', stock: 2 }
+    ];
+
+    const bows = [
+        { id: 1, name: '1號', img: 'https://picsum.photos/200?random=b1' },
+        { id: 2, name: '2號', img: 'https://picsum.photos/200?random=b2' },
+        { id: 3, name: '3號', img: 'https://picsum.photos/200?random=b3' },
+        { id: 4, name: '4號', img: 'https://picsum.photos/200?random=b4' }
+    ];
+
+    const bottles = [
+        { id: 1, name: '1號', img: 'https://picsum.photos/200?random=v1' },
+        { id: 2, name: '2號', img: 'https://picsum.photos/200?random=v2' },
+        { id: 3, name: '3號', img: 'https://picsum.photos/200?random=v3' },
+        { id: 4, name: '4號', img: 'https://picsum.photos/200?random=v4' }
+    ];
+
+    let selectedFlowers = [];
+    let selectedBow = null;
+    let selectedBottle = null;
+
     function switchTab(index) {
+        if (index === 3) {
+            // 點擊齒輪時若未登入，強制停留在登入畫面
+            // 允許直接切換過去看密碼框
+        }
         const contents = document.querySelectorAll('.tab-content');
         const buttons = document.querySelectorAll('.tab-btn');
         
-        contents.forEach((c, i) => {
-            c.classList.toggle('active', i === index);
-        });
-        buttons.forEach((b, i) => {
-            b.classList.toggle('active', i === index);
-        });
+        contents.forEach((c, i) => c.classList.toggle('active', i === index));
+        buttons.forEach((b, i) => b.classList.toggle('active', i === index));
     }
 
-    // 動態生成選單項目（正方形圖片框）
-    const createItems = (count, prefix, containerId, isMulti) => {
-        const container = document.getElementById(containerId);
-        for(let i = 1; i <= count; i++) {
+    function checkPassword() {
+        const pwd = document.getElementById('admin-pwd').value;
+        if (pwd === '861001') {
+            document.getElementById('login-box').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+            renderAdminList();
+        } else {
+            alert('密碼錯誤唷！');
+        }
+    }
+
+    // 渲染前端選單
+    function renderShop() {
+        // 花朵
+        const fContainer = document.getElementById('flower-grid');
+        fContainer.innerHTML = '';
+        flowers.forEach(f => {
             let div = document.createElement('div');
-            div.className = 'item';
-            div.innerHTML = `<img src="https://picsum.photos/200?random=${i + prefix}"><p>${i}號</p>`;
-            
+            let isOut = f.stock <= 0;
+            div.className = `item ${isOut ? 'out-of-stock' : ''} ${selectedFlowers.includes(f.name) ? 'selected' : ''}`;
+            div.innerHTML = `<img src="${f.img}"><p>${f.name}</p>`;
             div.onclick = () => {
-                if (isMulti) {
-                    div.classList.toggle('selected');
+                if (isOut) {
+                    alert('這款花目前庫存為 0，暫時無法選擇唷！');
+                    return;
+                }
+                if (selectedFlowers.includes(f.name)) {
+                    selectedFlowers = selectedFlowers.filter(item => item !== f.name);
+                    div.classList.remove('selected');
                 } else {
-                    // 單選邏輯：同區塊只能選一個
-                    container.querySelectorAll('.item').forEach(el => el.classList.remove('selected'));
+                    if (selectedFlowers.length >= 5) {
+                        alert('最多只能選擇 5 支花喔！');
+                        return;
+                    }
+                    selectedFlowers.push(f.name);
                     div.classList.add('selected');
                 }
                 updateText();
             };
-            container.appendChild(div);
-        }
-    };
+            fContainer.appendChild(div);
+        });
 
-    // 更新輸出文字
+        // 蝴蝶結
+        const bContainer = document.getElementById('bow-grid');
+        bContainer.innerHTML = '';
+        bows.forEach(b => {
+            let div = document.createElement('div');
+            div.className = `item ${selectedBow === b.name ? 'selected' : ''}`;
+            div.innerHTML = `<img src="${b.img}"><p>${b.name}</p>`;
+            div.onclick = () => {
+                selectedBow = (selectedBow === b.name) ? null : b.name;
+                renderShop();
+                updateText();
+            };
+            bContainer.appendChild(div);
+        });
+
+        // 玻璃瓶
+        const vContainer = document.getElementById('bottle-grid');
+        vContainer.innerHTML = '';
+        bottles.forEach(v => {
+            let div = document.createElement('div');
+            div.className = `item ${selectedBottle === v.name ? 'selected' : ''}`;
+            div.innerHTML = `<img src="${v.img}"><p>${v.name}</p>`;
+            div.onclick = () => {
+                selectedBottle = (selectedBottle === v.name) ? null : v.name;
+                renderShop();
+                updateText();
+            };
+            vContainer.appendChild(div);
+        });
+
+        updateText();
+    }
+
+    // 渲染後台管理清單
+    function renderAdminList() {
+        const list = document.getElementById('admin-flower-list');
+        list.innerHTML = '';
+        flowers.forEach((f, index) => {
+            let row = document.createElement('div');
+            row.className = 'admin-row';
+            row.innerHTML = `
+                <img src="${f.img}">
+                <input type="text" value="${f.name}" id="name-${index}" onchange="updateFlower(${index})">
+                <input type="number" value="${f.stock}" id="stock-${index}" title="庫存" onchange="updateFlower(${index})" min="0">
+                <button class="del-btn" onclick="deleteFlower(${index})">刪除</button>
+            `;
+            list.appendChild(row);
+        });
+    }
+
+    function updateFlower(index) {
+        flowers[index].name = document.getElementById(`name-${index}`).value;
+        flowers[index].stock = parseInt(document.getElementById(`stock-${index}`).value) || 0;
+        localStorage.setItem('flowers_data', JSON.stringify(flowers));
+        renderShop();
+    }
+
+    function deleteFlower(index) {
+        if (confirm('確定要刪除這款花嗎？')) {
+            flowers.splice(index, 1);
+            localStorage.setItem('flowers_data', JSON.stringify(flowers));
+            renderAdminList();
+            renderShop();
+        }
+    }
+
+    function addFlower() {
+        let name = document.getElementById('new-name').value;
+        let img = document.getElementById('new-img').value || 'https://picsum.photos/200';
+        if (!name) {
+            alert('請輸入花朵名稱或編號！');
+            return;
+        }
+        flowers.push({ id: Date.now(), name: name, img: img, stock: 5 });
+        localStorage.setItem('flowers_data', JSON.stringify(flowers));
+        document.getElementById('new-name').value = '';
+        document.getElementById('new-img').value = '';
+        renderAdminList();
+        renderShop();
+    }
+
     function updateText() {
-        let flowers = Array.from(document.querySelectorAll('#flower-grid .selected')).map(el => el.querySelector('p').innerText.replace('號',''));
-        let bow = document.querySelector('#bow-grid .selected')?.querySelector('p').innerText.replace('號','');
-        let bottle = document.querySelector('#bottle-grid .selected')?.querySelector('p').innerText.replace('號','');
-        
-        let flowerStr = flowers.length > 0 ? flowers.join(',') : '...';
-        let bowStr = bow ? `${bow}號` : '...';
-        let bottleStr = bottle ? `${bottle}號` : '...';
+        let flowerStr = selectedFlowers.length > 0 ? selectedFlowers.join(',') : '...';
+        let bowStr = selectedBow ? `${selectedBow}` : '...';
+        let bottleStr = selectedBottle ? `${selectedBottle}` : '...';
 
         document.getElementById('output').value = `我想要這些花${flowerStr}\n蝴蝶結要${bowStr}\n玻璃瓶要${bottleStr}\n謝謝你!`;
     }
 
-    // 複製文字
     function copyText() {
         const textarea = document.getElementById('output');
         textarea.select();
@@ -294,11 +470,8 @@
         alert('已成功複製訂購文字！快傳給闆娘吧 💕');
     }
 
-    // 初始化項目 (15朵花, 4個蝴蝶結, 4個玻璃瓶)
-    createItems(15, 'f', 'flower-grid', true);   // 花朵可多選
-    createItems(4, 'b', 'bow-grid', false);      // 蝴蝶結單選
-    createItems(4, 'v', 'bottle-grid', false);   // 玻璃瓶單選
-    updateText();
+    // 初始化
+    renderShop();
 </script>
 
 </body>
