@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阿桑的串珠花店｜自助選花小幫手</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:10px;background:#ffdce6;color:#5c4d50;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+button,input,textarea{font-family:inherit}
+.window{width:100%;max-width:560px;margin:auto;background:#fffdfd;border:3px solid #d67b91;box-shadow:7px 7px 0 rgba(190,102,127,.3);border-radius:5px;overflow:hidden}
+.header{background:#d67b91;color:white;padding:10px 13px;font-size:14px;font-weight:bold;display:flex;justify-content:space-between}
+.tabs{display:flex;background:#f7c5d1}
+.tab{flex:1;border:0;border-right:2px solid #e68fa6;background:#f7c5d1;color:#745b62;padding:10px 2px;font-size:10px;font-weight:bold;cursor:pointer}
+.tab:last-child{border-right:0}.tab.active{background:white;color:#d06783}
+.page{display:none;padding:14px;min-height:450px}.page.active{display:block}
+.card{background:white;border:2px solid #ff9eb8;padding:12px;margin-bottom:12px}
+h2{color:#d06783;font-size:20px;margin:5px 0 10px}h3{color:#d06783;font-size:14px;margin:0 0 10px}
+.notice{background:#fff3f6;border:1px dashed #ef9db1;padding:9px;font-size:12px;line-height:1.7;margin-bottom:10px}
+.home-flower{text-align:center;font-size:48px;margin-top:5px}.home-text{text-align:center;font-size:13px;line-height:1.8}
+.main-button,.copy-button{width:100%;border:0;background:#d67b91;color:white;padding:12px;margin-top:8px;cursor:pointer;font-weight:bold;font-size:13px}
+.outline-button,.reset-button{width:100%;border:2px solid #d67b91;background:white;color:#d06783;padding:10px;margin-top:8px;cursor:pointer;font-weight:bold}
+.type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.type-button{border:2px solid #ff9eb8;background:white;color:#745b62;padding:11px 5px;cursor:pointer;font-size:12px;font-weight:bold;line-height:1.5}
+.type-button.active{background:#ffd5e0;border-color:#d06783;color:#d06783}
+.search-box{margin-bottom:10px}.search-box input{width:100%;border:2px solid #ff9eb8;padding:10px;outline:none;background:#fffafa;font-size:12px}
+.flower-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.flower-card{border:2px solid #ffb0c2;background:white;padding:7px}.flower-card.selected{background:#fff0f4;border-color:#d06783}.flower-card.soldout{filter:grayscale(100%);opacity:.55}
+.flower-image{width:100%;aspect-ratio:1;background:#fff3f6;display:flex;justify-content:center;align-items:center;overflow:hidden;font-size:38px}
+.flower-image img,.bottle-image img,.bow-image img,.preview-image img,.portfolio-image img{width:100%;height:100%;object-fit:cover}
+.flower-name{font-size:12px;font-weight:bold;margin:7px 0;text-align:center;min-height:18px}.stock-text{text-align:center;font-size:10px;color:#9a7c84;margin-bottom:5px}.soldout-label{text-align:center;font-size:11px;color:#777;font-weight:bold;padding:5px}
+.quantity{display:flex;justify-content:center;align-items:center;gap:9px}.qty{width:31px;height:31px;border:2px solid #d67b91;background:white;color:#d06783;font-size:19px;font-weight:bold;cursor:pointer}.qty-number{width:25px;text-align:center;font-weight:bold;color:#d06783}
+.pagination{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:12px;flex-wrap:wrap}.page-btn{min-width:34px;height:34px;border:2px solid #ff9eb8;background:white;color:#d06783;font-weight:bold;cursor:pointer}.page-btn.active{background:#d67b91;color:white;border-color:#d67b91}.page-btn:disabled{opacity:.4}.page-info{width:100%;text-align:center;font-size:11px;color:#8d737a;margin-top:3px}
+.count-box{margin-top:10px;padding:10px;text-align:center;border:2px solid #ff9eb8;background:#fff4f7;color:#d06783;font-size:13px;font-weight:bold;line-height:1.7}.count-box.warning{background:#fff7df;border-color:#e6bd69;color:#9a7523}.count-box.complete{background:#ffe0e9;border-color:#d06783}
+.bottle-grid,.bow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.bottle,.bow{border:2px solid #ff9eb8;background:white;padding:6px;text-align:center;cursor:pointer}.bottle.active,.bow.active{background:#ffdce6;border-color:#d06783}
+.bottle-image,.bow-image{aspect-ratio:1;background:#fff3f6;display:flex;justify-content:center;align-items:center;font-size:34px;overflow:hidden}.bottle-name,.bow-name{font-size:11px;font-weight:bold;margin-top:6px}
+.price-box{text-align:center;padding:10px;background:#fff7f9;border:2px solid #d67b91}.price-small{font-size:11px}.price{font-size:23px;color:#d06783;font-weight:bold}
+.success{display:none;text-align:center;padding:15px 10px;margin-bottom:12px;background:#fff0f4;border:2px solid #ff9eb8}.success-icon{font-size:34px}
+.selection-summary{background:#fff7fa;border:2px solid #d67b91;padding:10px;margin-top:10px}
+.selection-empty{text-align:center;color:#9a7c84;font-size:12px;padding:12px}
+.summary-title{color:#d06783;font-size:13px;font-weight:bold;margin-bottom:8px}
+.summary-section{margin-bottom:10px}.summary-label{font-size:11px;font-weight:bold;color:#806c72;margin-bottom:6px}
+.preview-row{display:flex;gap:7px;flex-wrap:wrap}
+.preview-item{width:70px;position:relative;border:2px solid #ffb0c2;background:white;padding:4px}
+.preview-image{width:60px;height:60px;background:#fff3f6;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:25px}
+.preview-name{font-size:9px;text-align:center;font-weight:bold;margin-top:4px;line-height:1.25}
+.preview-qty{font-size:9px;text-align:center;color:#d06783;margin-top:2px}
+.remove-preview{position:absolute;right:-7px;top:-7px;width:22px;height:22px;border-radius:50%;border:2px solid white;background:#d06783;color:white;font-size:13px;line-height:17px;padding:0;cursor:pointer;font-weight:bold}
+#order-output{width:100%;height:190px;resize:none;border:2px solid #ff9eb8;background:#fffafa;padding:9px;font-size:12px;line-height:1.7;color:#5c4d50}
+.portfolio-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.portfolio{border:2px solid #ff9eb8;background:white;padding:6px;text-align:center}.portfolio-image{aspect-ratio:1;background:#fff3f6;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:35px}.portfolio p{font-size:11px;font-weight:bold;margin:7px 0 3px}
+.admin-login input,.admin-form input{width:100%;border:2px solid #ff9eb8;padding:9px;margin-bottom:8px;background:white}.admin-section{border:2px solid #ff9eb8;padding:10px;margin-bottom:12px}.admin-help{font-size:11px;color:#806c72;line-height:1.7;background:#fff5f7;padding:8px;margin-bottom:8px}.save-btn{width:100%;border:0;background:#d67b91;color:white;padding:10px;font-weight:bold;cursor:pointer}
+.admin-product{border:1px solid #ffb0c2;background:#fff7f9;padding:8px;margin-bottom:8px;overflow:hidden}.admin-product-image{width:65px;height:65px;object-fit:cover;background:#eee;float:left;margin-right:8px}.admin-product-title{font-weight:bold;font-size:12px;color:#d06783}.admin-product-info{font-size:11px;line-height:1.6}.admin-actions{clear:both;padding-top:8px;display:flex;gap:5px}.admin-actions button{flex:1;border:0;padding:7px;cursor:pointer;font-size:11px;font-weight:bold}.edit-btn{background:#d67b91;color:white}.delete-btn{background:#e74c3c;color:white}.logout{width:100%;border:2px solid #d67b91;background:white;color:#d06783;padding:10px;font-weight:bold}
+.link-card{display:block;text-decoration:none;border:2px solid #d67b91;color:#d06783;background:white;padding:10px;margin-top:8px;text-align:center;font-weight:bold;font-size:12px}
+@media(min-width:500px){.flower-grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<div class="window">
+<div class="header"><span>♥ 阿桑的串珠花店</span><span>✿</span></div>
+<div class="tabs">
+<button class="tab active" onclick="showPage('home',this)">🌿首頁</button>
+<button class="tab" onclick="showPage('shop',this)">🌷自選花</button>
+<button class="tab" onclick="showPage('works',this)">🎀作品</button>
+<button class="tab" onclick="showPage('info',this)">💌資訊</button>
+<button class="tab" onclick="showPage('admin',this)">🗝️後台</button>
+</div>
+
+<div class="page active" id="home">
+<div class="card">
+<div class="home-flower">🌷</div>
+<h2 style="text-align:center">阿桑的串珠花店</h2>
+<div class="home-text">歡迎來到阿桑的串珠花店 ♡<br>自己挑喜歡的花朵，<br>組成只屬於你的串珠花束！</div>
+<button class="main-button" onclick="goShop()">🌸 開始自選花束</button>
+</div>
+<div class="card"><h3>🛍️ 下單方式</h3><div class="notice">① 在這裡選好你的花束<br>② 確認最下面的「我的選擇」<br>③ 複製訂購文字<br>④ 前往賣貨便下單<br>⑤ 把訂購文字貼到訂單提問區給阿桑 ♡</div><div id="home-links"></div></div>
+</div>
+
+<div class="page" id="shop">
+<div class="card">
+<h3>① 你想做的款式（單選）</h3>
+<div class="notice">💐 花束款：不能選花瓶<br>🫙 花瓶款：一定要選花瓶</div>
+<div class="type-grid" id="type-grid"></div>
+</div>
+
+<div class="card">
+<h3>② 🌸 選擇花朵</h3>
+<div class="notice" id="flower-help">請先選擇上面的款式 ♡</div>
+<div class="search-box"><input id="flower-search" type="text" placeholder="🔍 搜尋花朵名稱..." oninput="searchFlowers()"></div>
+<div class="flower-grid" id="flower-grid"></div>
+<div class="pagination" id="flower-pagination"></div>
+<div class="count-box" id="count-box" style="display:none"></div>
+</div>
+
+<div class="card" id="bow-section">
+<h3>③ 🎀 選擇蝴蝶結（單選）</h3>
+<div class="notice" id="bow-help">請先選擇款式與花朵 ♡</div>
+<div class="bow-grid" id="bow-grid"></div>
+</div>
+
+<div class="card" id="bottle-section" style="display:none">
+<h3>④ 🏺 選擇玻璃瓶</h3>
+<div class="notice">花瓶款一定要選一個玻璃瓶喔！</div>
+<div class="bottle-grid" id="bottle-grid"></div>
+</div>
+
+<div class="card selection-summary">
+<h3>🛒 我的選擇</h3>
+<div class="notice">複製訂購文字前，先在這裡確認圖片是不是你想要的 ♡<br>不想要的花可以直接按右上角 × 取消。</div>
+<div id="selection-summary"></div>
+</div>
+
+<div class="card" id="price-section" style="display:none">
+<h3>💰 金額</h3>
+<div class="price-box"><div class="price-small">預估金額</div><div class="price" id="price-display">$0</div></div>
+</div>
+
+<div class="success" id="success"><div class="success-icon">🌷✨</div><h2>你的花束完成啦！</h2><div id="success-text"></div></div>
+
+<div class="card">
+<h3>🧾 訂購內容</h3>
+<textarea id="order-output" readonly placeholder="選好花束後，訂購內容會出現在這裡..."></textarea>
+<button class="copy-button" onclick="copyOrder()">📋 複製訂購文字</button>
+<button class="reset-button" onclick="resetOrder()">↩️ 重新選擇</button>
+</div>
+</div>
+
+<div class="page" id="works"><div class="card"><h3>🎀 阿桑的作品</h3><div class="portfolio-grid" id="portfolio-grid"></div></div></div>
+
+<div class="page" id="info">
+<div class="card"><h3>📅 近期擺攤資訊</h3><div id="event-info"></div></div>
+<div class="card"><h3>💌 聯絡阿桑</h3><div id="contact-links"></div></div>
+</div>
+
+<div class="page" id="admin">
+<div class="card" id="admin-login"><h3>🗝️ 員工專區</h3><input type="password" id="admin-password" placeholder="輸入員工密碼"><button class="main-button" onclick="loginAdmin()">登入後台</button></div>
+<div id="admin-panel" style="display:none">
+<div class="admin-section">
+<h3>🌸 花朵商品管理</h3>
+<div class="admin-help">新增或修改花朵。圖片可使用 GitHub raw 圖片網址。庫存填 0 → 客人看到會自動變灰＋顯示售罄。</div>
+<div class="admin-form">
+<input type="hidden" id="edit-id"><input id="product-name" placeholder="商品名稱"><input id="product-image" placeholder="GitHub 圖片網址"><input id="product-price" type="number" min="0" placeholder="商品價格"><input id="product-stock" type="number" min="0" placeholder="庫存">
+<button class="save-btn" onclick="saveProduct()">💾 儲存商品</button>
+</div><br><div id="admin-products"></div>
+</div>
+
+<div class="admin-section"><h3>🎀 蝴蝶結管理</h3><div class="admin-help">蝴蝶結目前設定為單選。客人會在自選花頁面選一個，並且會出現在最下面的圖片總覽。</div><div id="admin-bows"></div></div>
+
+<div class="admin-section"><h3>💰 款式價格</h3><div id="admin-types"></div></div>
+
+<div class="admin-section"><h3>🏺 玻璃瓶管理</h3><div id="admin-bottles"></div></div>
+
+<div class="admin-section"><h3>🔗 網站連結</h3>
+<input id="link-ig" placeholder="Instagram 網址" style="width:100%;padding:9px;border:2px solid #ff9eb8;margin-bottom:7px">
+<input id="link-shop" placeholder="賣貨便網址" style="width:100%;padding:9px;border:2px solid #ff9eb8;margin-bottom:7px">
+<input id="link-other" placeholder="其他網址" style="width:100%;padding:9px;border:2px solid #ff9eb8;margin-bottom:7px">
+<button class="save-btn" onclick="saveLinks()">💾 儲存連結</button></div>
+
+<div class="admin-section"><h3>📅 擺攤資訊</h3>
+<input id="event-name" placeholder="市集名稱" style="width:100%;padding:9px;border:2px solid #ff9eb8;margin-bottom:7px">
+<input id="event-date" placeholder="日期，例如：8/30" style="width:100%;padding:9px;border:2px solid #ff9eb8;margin-bottom:7px">
+<input id="event-place" placeholder="地點" style="width:100%;padding:9px;border:2px solid #ff9eb8;margin-bottom:7px">
+<input id="event-time" placeholder="時間" style="width:100%;padding:9px;border:2px solid #ff9eb8;margin-bottom:7px">
+<button class="save-btn" onclick="saveEvent()">💾 儲存擺攤資訊</button></div>
+<button class="logout" onclick="logoutAdmin()">🔒 登出</button>
+</div>
+</div>
+</div>
+
+<script>
+const ADMIN_PASSWORD="861001";
+const IMAGE_BASE="https://raw.githubusercontent.com/rosinaloson/Beaded-flower-shop/main/images/";
+const FLOWERS_PER_PAGE=24;
+const API_BASE="https://beaded-flower-api.rosinaloson.workers.dev";
+
+const defaultProducts=[
+{id:"flower-1",name:"櫻花粉",image:IMAGE_BASE+"flowers/IMG_5039.jpeg",price:0,stock:10},
+{id:"flower-2",name:"月白",image:"",price:0,stock:10},
+{id:"flower-3",name:"薰衣草紫",image:"",price:0,stock:10},
+{id:"flower-4",name:"晴空藍",image:"",price:0,stock:10}
+];
+
+const defaultBows=[
+{id:"bow-1",name:"1號蝴蝶結",image:"",stock:10},
+{id:"bow-2",name:"2號蝴蝶結",image:"",stock:10},
+{id:"bow-3",name:"3號蝴蝶結",image:"",stock:10},
+{id:"bow-4",name:"4號蝴蝶結",image:"",stock:10}
+];
+
+const defaultBottles=[
+{id:"bottle-1",name:"透明圓瓶",image:"",stock:10},
+{id:"bottle-2",name:"透明方瓶",image:"",stock:10},
+{id:"bottle-3",name:"復古玻璃瓶",image:"",stock:10}
+];
+
+const types=[
+{id:"bouquet5",name:"💐 花束5朵",count:5,bottle:false,price:350},
+{id:"bouquet7",name:"💐 花束7朵",count:7,bottle:false,price:450},
+{id:"bouquet9",name:"💐 花束9朵",count:9,bottle:false,price:550},
+{id:"bouquetCustom",name:"💐 花束客製",count:99,bottle:false,price:0},
+{id:"vase5",name:"🫙 花瓶5朵",count:5,bottle:true,price:500},
+{id:"vase7",name:"🫙 花瓶7朵",count:7,bottle:true,price:600},
+{id:"vase9",name:"🫙 花瓶9朵",count:9,bottle:true,price:700},
+{id:"vaseCustom",name:"🫙 花瓶客製",count:99,bottle:true,price:0}
+];
+
+let products=JSON.parse(localStorage.getItem("assanProducts"))||defaultProducts;
+let bows=JSON.parse(localStorage.getItem("assanBows"))||defaultBows;
+let bottles=JSON.parse(localStorage.getItem("assanBottles"))||defaultBottles;
+let savedTypes=JSON.parse(localStorage.getItem("assanTypes"))||{};
+let links=JSON.parse(localStorage.getItem("assanLinks"))||{instagram:"",shop:"",other:""};
+let eventData=JSON.parse(localStorage.getItem("assanEvent"))||{name:"",date:"",place:"",time:""};
+
+types.forEach(t=>{if(savedTypes[t.id]!==undefined)t.price=savedTypes[t.id]});
+
+let selectedType=null,quantities={},selectedBow=null,selectedBottle=null,flowerCurrentPage=1,flowerSearch="";
+
+function saveProducts(){localStorage.setItem("assanProducts",JSON.stringify(products))}
+function saveBows(){localStorage.setItem("assanBows",JSON.stringify(bows))}
+function saveBottles(){localStorage.setItem("assanBottles",JSON.stringify(bottles))}
+function saveTypes(){const x={};types.forEach(t=>x[t.id]=t.price);localStorage.setItem("assanTypes",JSON.stringify(x))}
+
+function showPage(id,button){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+ if(button)button.classList.add("active");
+ if(id==="works")renderWorks();
+ if(id==="info")renderInfo();
+ if(id==="admin")renderAdmin();
+}
+function goShop(){showPage("shop",document.querySelectorAll(".tab")[1])}
+
+function renderTypes(){
+ const box=document.getElementById("type-grid");box.innerHTML="";
+ types.forEach(type=>{
+  const b=document.createElement("button");b.className="type-button "+(selectedType?.id===type.id?"active":"");
+  b.innerHTML=`${type.name}<br>${type.price>0?"$"+type.price.toLocaleString():"客製報價"}`;
+  b.onclick=()=>selectType(type);box.appendChild(b);
+ });
+}
+function selectType(type){
+ selectedType=type;quantities={};selectedBow=null;selectedBottle=null;flowerCurrentPage=1;flowerSearch="";
+ document.getElementById("flower-search").value="";
+ document.getElementById("bottle-section").style.display=type.bottle?"block":"none";
+ document.getElementById("price-section").style.display="block";
+ renderTypes();renderFlowers();renderBows();renderBottles();updateAll();
+}
+
+function searchFlowers(){flowerSearch=document.getElementById("flower-search").value.trim().toLowerCase();flowerCurrentPage=1;renderFlowers()}
+function getFilteredFlowers(){return flowerSearch?products.filter(p=>p.name.toLowerCase().includes(flowerSearch)):products}
+function getTotalFlowers(){return Object.values(quantities).reduce((a,b)=>a+b,0)}
+
+function renderFlowers(){
+ const box=document.getElementById("flower-grid"),pag=document.getElementById("flower-pagination"),help=document.getElementById("flower-help");
+ box.innerHTML="";pag.innerHTML="";
+ if(!selectedType){help.textContent="請先選擇上面的款式 ♡";return}
+ help.textContent=selectedType.count===99?"🎀 客製款可以自由選擇花朵數量 ♡":`🌸 請選滿 ${selectedType.count} 朵`;
+ const filtered=getFilteredFlowers(),totalPages=Math.max(1,Math.ceil(filtered.length/FLOWERS_PER_PAGE));
+ flowerCurrentPage=Math.min(flowerCurrentPage,totalPages);
+ const start=(flowerCurrentPage-1)*FLOWERS_PER_PAGE;
+ filtered.slice(start,start+FLOWERS_PER_PAGE).forEach(product=>{
+  const q=quantities[product.id]||0,soldout=product.stock<=0,card=document.createElement("div");
+  card.className="flower-card "+(q>0?"selected ":"")+(soldout?"soldout":"");
+  const image=product.image?`<img src="${product.image}" alt="${product.name}" onerror="this.style.display='none'">`:"🌸";
+  card.innerHTML=`<div class="flower-image">${image}</div><div class="flower-name">${product.name}</div>${
+   soldout?`<div class="soldout-label">售罄</div>`:
+   `<div class="stock-text">庫存 ${product.stock}</div><div class="quantity">
+   <button class="qty" onclick="changeQuantity('${product.id}',-1)">−</button><div class="qty-number">${q}</div>
+   <button class="qty" onclick="changeQuantity('${product.id}',1)">＋</button></div>`}`;
+  box.appendChild(card);
+ });
+ renderFlowerPagination(totalPages);
+}
+function renderFlowerPagination(totalPages){
+ const box=document.getElementById("flower-pagination");box.innerHTML="";
+ if(totalPages<=1)return;
+ const prev=document.createElement("button");prev.className="page-btn";prev.textContent="‹";prev.disabled=flowerCurrentPage===1;prev.onclick=()=>{flowerCurrentPage--;renderFlowers()};box.appendChild(prev);
+ let s=Math.max(1,flowerCurrentPage-2),e=Math.min(totalPages,flowerCurrentPage+2);
+ if(s>1){addPageButton(box,1);if(s>2)addDots(box)}
+ for(let i=s;i<=e;i++)addPageButton(box,i);
+ if(e<totalPages){if(e<totalPages-1)addDots(box);addPageButton(box,totalPages)}
+ const next=document.createElement("button");next.className="page-btn";next.textContent="›";next.disabled=flowerCurrentPage===totalPages;next.onclick=()=>{flowerCurrentPage++;renderFlowers()};box.appendChild(next);
+ const info=document.createElement("div");info.className="page-info";info.textContent=`第 ${flowerCurrentPage} 頁 / 共 ${totalPages} 頁 ・ 共 ${getFilteredFlowers().length} 款`;box.appendChild(info);
+}
+function addPageButton(box,page){const b=document.createElement("button");b.className="page-btn "+(page===flowerCurrentPage?"active":"");b.textContent=page;b.onclick=()=>{flowerCurrentPage=page;renderFlowers()};box.appendChild(b)}
+function addDots(box){const s=document.createElement("span");s.textContent="…";s.style.padding="8px 2px";box.appendChild(s)}
+
+function changeQuantity(id,change){
+ const p=products.find(x=>x.id===id);if(!p||p.stock<=0)return;
+ const current=quantities[id]||0,next=current+change;if(next<0)return;
+ if(change>0){
+  if(next>p.stock){alert(`「${p.name}」目前庫存只有 ${p.stock} 朵喔！`);return}
+  if(selectedType&&selectedType.count!==99&&getTotalFlowers()>=selectedType.count){alert(`你選的是「${selectedType.name}」喔！\n\n這個款式只能選 ${selectedType.count} 朵唷！`);return}
+ }
+ if(next===0)delete quantities[id];else quantities[id]=next;
+ renderFlowers();updateAll();
+}
+
+function renderBows(){
+ const box=document.getElementById("bow-grid"),help=document.getElementById("bow-help");box.innerHTML="";
+ if(!selectedType){help.textContent="請先選擇款式與花朵 ♡";return}
+ help.textContent="🎀 請選一個蝴蝶結，選好後會出現在下方總覽 ♡";
+ bows.forEach(bow=>{
+  const soldout=bow.stock<=0,div=document.createElement("div");
+  div.className="bow "+(selectedBow?.id===bow.id?"active":"");if(soldout)div.style.opacity=".5";
+  const image=bow.image?`<img src="${bow.image}" alt="${bow.name}">`:"🎀";
+  div.innerHTML=`<div class="bow-image">${image}</div><div class="bow-name">${bow.name}<br>${soldout?"售罄":"庫存 "+bow.stock}</div>`;
+  if(!soldout)div.onclick=()=>{selectedBow=selectedBow?.id===bow.id?null:bow;renderBows();updateAll()};
+  box.appendChild(div);
+ });
+}
+
+function renderBottles(){
+ const box=document.getElementById("bottle-grid");box.innerHTML="";
+ if(!selectedType||!selectedType.bottle)return;
+ bottles.forEach(b=>{
+  const soldout=b.stock<=0,div=document.createElement("div");div.className="bottle "+(selectedBottle?.id===b.id?"active":"");if(soldout)div.style.opacity=".5";
+  const image=b.image?`<img src="${b.image}" alt="${b.name}">`:"🫙";
+  div.innerHTML=`<div class="bottle-image">${image}</div><div class="bottle-name">${b.name}<br>${soldout?"售罄":"庫存 "+b.stock}</div>`;
+  if(!soldout)div.onclick=()=>{selectedBottle=selectedBottle?.id===b.id?null:b;renderBottles();updateAll()};
+  box.appendChild(div);
+ });
+}
+
+function updateCount(){
+ const box=document.getElementById("count-box");if(!selectedType){box.style.display="none";return}
+ box.style.display="block";const total=getTotalFlowers();
+ if(selectedType.count===99){box.className="count-box";box.innerHTML=`🌸 目前已選 <strong>${total}</strong> 朵`;return}
+ const left=selectedType.count-total;
+ if(left>0){box.className="count-box warning";box.innerHTML=`🌸 已選 <strong>${total}</strong> / ${selectedType.count} 朵<br>還差 <strong>${left} 朵</strong> 唷！`}
+ else{box.className="count-box complete";box.innerHTML=`🌷 已選滿 ${selectedType.count} 朵 ♡`}
+}
+
+function previewItem(image,name,qty,onRemove){
+ const div=document.createElement("div");div.className="preview-item";
+ div.innerHTML=`<button class="remove-preview" title="取消">×</button><div class="preview-image">${image?`<img src="${image}" alt="${name}">`:"🌸"}</div><div class="preview-name">${name}</div>${qty?`<div class="preview-qty">× ${qty}</div>`:""}`;
+ div.querySelector(".remove-preview").onclick=onRemove;return div;
+}
+
+function renderSelectionSummary(){
+ const box=document.getElementById("selection-summary");box.innerHTML="";
+ if(!selectedType){box.innerHTML='<div class="selection-empty">先選擇上方的款式，這裡就會顯示你的花束 ♡</div>';return}
+ let total=getTotalFlowers();
+ const flowerSection=document.createElement("div");flowerSection.className="summary-section";
+ flowerSection.innerHTML='<div class="summary-label">🌸 花朵</div><div class="preview-row"></div>';
+ const row=flowerSection.querySelector(".preview-row");
+ products.forEach(p=>{const q=quantities[p.id]||0;if(q>0)row.appendChild(previewItem(p.image,p.name,q,()=>{delete quantities[p.id];renderFlowers();updateAll()}))});
+ if(!row.children.length)row.innerHTML='<div class="selection-empty">還沒有選花</div>';
+ box.appendChild(flowerSection);
+
+ const bowSection=document.createElement("div");bowSection.className="summary-section";bowSection.innerHTML='<div class="summary-label">🎀 蝴蝶結</div><div class="preview-row"></div>';
+ const brow=bowSection.querySelector(".preview-row");
+ if(selectedBow)brow.appendChild(previewItem(selectedBow.image,selectedBow.name,null,()=>{selectedBow=null;renderBows();updateAll()}));else brow.innerHTML='<div class="selection-empty">尚未選擇蝴蝶結</div>';
+ box.appendChild(bowSection);
+
+ if(selectedType.bottle){
+  const bottleSection=document.createElement("div");bottleSection.className="summary-section";bottleSection.innerHTML='<div class="summary-label">🏺 玻璃瓶</div><div class="preview-row"></div>';
+  const vrow=bottleSection.querySelector(".preview-row");
+  if(selectedBottle)vrow.appendChild(previewItem(selectedBottle.image,selectedBottle.name,null,()=>{selectedBottle=null;renderBottles();updateAll()}));else vrow.innerHTML='<div class="selection-empty">尚未選擇玻璃瓶</div>';
+  box.appendChild(bottleSection);
+ }
+}
+
+function updatePrice(){document.getElementById("price-display").textContent=!selectedType?"$0":selectedType.price?"$"+selectedType.price.toLocaleString():"客製報價"}
+
+function createOrderText(){
+ if(!selectedType)return "";
+ let text="🌷 阿桑的串珠花店訂單\n━━━━━━━━━━━━━━\n";
+ text+=`款式：${selectedType.name}\n花朵數量：${getTotalFlowers()} 朵\n\n🌸 花朵\n`;
+ products.forEach(p=>{const q=quantities[p.id]||0;if(q>0)text+=`${p.name} × ${q}\n`});
+ text+="\n🎀 蝴蝶結\n"+(selectedBow?selectedBow.name:"尚未選擇")+"\n";
+ if(selectedType.bottle)text+="\n🏺 玻璃瓶\n"+(selectedBottle?selectedBottle.name:"尚未選擇")+"\n";
+ text+="\n💰 金額\n"+(selectedType.price?"$"+selectedType.price.toLocaleString():"客製報價")+"\n━━━━━━━━━━━━━━";
+ return text;
+}
+function updateOutput(){document.getElementById("order-output").value=createOrderText()}
+
+function updateSuccess(){
+ const success=document.getElementById("success");if(!selectedType){success.style.display="none";return}
+ const total=getTotalFlowers(),flowerOK=selectedType.count===99?total>0:total===selectedType.count;
+ const bottleOK=!selectedType.bottle||selectedBottle!==null;
+ const bowOK=selectedBow!==null;
+ if(flowerOK&&bottleOK&&bowOK){success.style.display="block";document.getElementById("success-text").innerHTML=`${selectedType.name}<br>已選 ${total} 朵<br>🎀 ${selectedBow.name}${selectedBottle?`<br>🫙 ${selectedBottle.name}`:""}<br>${selectedType.price?"💰 $"+selectedType.price.toLocaleString():"💰 客製報價"}`}
+ else success.style.display="none";
+}
+function updateAll(){updateCount();updatePrice();updateOutput();updateSuccess();renderSelectionSummary()}
+
+function copyOrder(){
+ if(!selectedType){alert("請先選擇你想做的款式喔！");return}
+ const total=getTotalFlowers();
+ if(selectedType.count!==99&&total!==selectedType.count){alert(`目前選了 ${total} 朵，還需要 ${Math.max(0,selectedType.count-total)} 朵唷！🌸`);return}
+ if(selectedType.count===99&&total===0){alert("至少要選 1 朵花唷！");return}
+ if(!selectedBow){alert("記得選擇蝴蝶結唷！🎀");return}
+ if(selectedType.bottle&&!selectedBottle){alert("記得選擇玻璃瓶唷！🫙");return}
+ const text=createOrderText();
+ if(navigator.clipboard)navigator.clipboard.writeText(text).then(()=>alert("🌷 訂購文字已複製完成！")).catch(fallbackCopy);else fallbackCopy();
+}
+function fallbackCopy(){const t=document.getElementById("order-output");t.focus();t.select();alert("訂購文字已選取，請手動複製 ♡")}
+function resetOrder(){
+ selectedType=null;quantities={};selectedBow=null;selectedBottle=null;flowerCurrentPage=1;flowerSearch="";
+ document.getElementById("flower-search").value="";document.getElementById("bottle-section").style.display="none";document.getElementById("price-section").style.display="none";document.getElementById("success").style.display="none";document.getElementById("order-output").value="";
+ renderTypes();renderFlowers();renderBows();renderBottles();updateAll();
+}
+
+function renderWorks(){
+ const box=document.getElementById("portfolio-grid");box.innerHTML="";
+ [{name:"MINI BEADED FLOWER BOUQUET",image:IMAGE_BASE+"flowers/IMG_5039.jpeg"},{name:"透明串珠花束",image:""},{name:"阿桑的串珠小花",image:""},{name:"昭和喫茶系列",image:""}].forEach(w=>{
+  const d=document.createElement("div");d.className="portfolio";d.innerHTML=`<div class="portfolio-image">${w.image?`<img src="${w.image}" alt="${w.name}">`:"🌷"}</div><p>${w.name}</p>`;box.appendChild(d);
+ });
+}
+function renderLinks(){
+ const box=document.getElementById("home-links");box.innerHTML="";
+ if(links.instagram)box.innerHTML+=`<a class="link-card" href="${links.instagram}" target="_blank">📷 追蹤阿桑 Instagram</a>`;
+ if(links.shop)box.innerHTML+=`<a class="link-card" href="${links.shop}" target="_blank">🛍️ 前往賣貨便</a>`;
+}
+function renderInfo(){
+ document.getElementById("event-info").innerHTML=eventData.name?`<div class="notice"><strong>${eventData.name}</strong><br><br>📅 ${eventData.date}<br>📍 ${eventData.place}<br>🕐 ${eventData.time}</div>`:`<div class="notice">🌷 目前暫無擺攤資訊<br>有新場次會再公告喔 ♡</div>`;
+ const c=document.getElementById("contact-links");c.innerHTML="";
+ if(links.instagram)c.innerHTML+=`<a class="link-card" href="${links.instagram}" target="_blank">📷 Instagram</a>`;
+ if(links.shop)c.innerHTML+=`<a class="link-card" href="${links.shop}" target="_blank">🛍️ 賣貨便</a>`;
+ if(links.other)c.innerHTML+=`<a class="link-card" href="${links.other}" target="_blank">🔗 其他連結</a>`;
+}
+
+function loginAdmin(){
+ if(document.getElementById("admin-password").value===ADMIN_PASSWORD){document.getElementById("admin-login").style.display="none";document.getElementById("admin-panel").style.display="block";renderAdmin()}else alert("密碼錯誤喔！");
+}
+function logoutAdmin(){document.getElementById("admin-login").style.display="block";document.getElementById("admin-panel").style.display="none";document.getElementById("admin-password").value=""}
+function renderAdmin(){
+ renderAdminProducts();renderAdminBows();renderAdminTypes();renderAdminBottles();
+ document.getElementById("link-ig").value=links.instagram||"";document.getElementById("link-shop").value=links.shop||"";document.getElementById("link-other").value=links.other||"";
+ document.getElementById("event-name").value=eventData.name||"";document.getElementById("event-date").value=eventData.date||"";document.getElementById("event-place").value=eventData.place||"";document.getElementById("event-time").value=eventData.time||"";
+}
+function renderAdminProducts(){
+ const box=document.getElementById("admin-products");box.innerHTML="";
+ products.forEach(p=>{
+  const d=document.createElement("div");d.className="admin-product";const image=p.image?`<img class="admin-product-image" src="${p.image}">`:"🌸";
+  d.innerHTML=`${image}<div class="admin-product-title">${p.name}</div><div class="admin-product-info">價格：$${p.price||0}<br>庫存：${p.stock}${p.stock<=0?"（售罄）":""}</div><div class="admin-actions"><button class="edit-btn" onclick="editProduct('${p.id}')">✏️ 修改</button><button class="delete-btn" onclick="deleteProduct('${p.id}')">🗑️ 刪除</button></div><div style="clear:both"></div>`;box.appendChild(d);
+ });
+}
+function saveProduct(){
+ const id=document.getElementById("edit-id").value,name=document.getElementById("product-name").value.trim(),image=document.getElementById("product-image").value.trim(),price=Number(document.getElementById("product-price").value),stock=Number(document.getElementById("product-stock").value);
+ if(!name||!image||isNaN(stock)||stock<0){alert("請確認名稱、圖片網址與庫存！");return}
+ if(id){const p=products.find(x=>x.id===id);if(p){p.name=name;p.image=image;p.price=price;p.stock=stock}}else products.push({id:"flower-"+Date.now(),name,image,price,stock});
+ saveProducts();clearProductForm();renderAdminProducts();renderFlowers();alert("商品已儲存完成！🌸");
+}
+function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;document.getElementById("edit-id").value=p.id;document.getElementById("product-name").value=p.name;document.getElementById("product-image").value=p.image;document.getElementById("product-price").value=p.price;document.getElementById("product-stock").value=p.stock}
+function deleteProduct(id){const p=products.find(x=>x.id===id);if(p&&confirm(`確定要刪除「${p.name}」嗎？`)){products=products.filter(x=>x.id!==id);delete quantities[id];saveProducts();renderAdminProducts();renderFlowers();updateAll()}}
+function clearProductForm(){["edit-id","product-name","product-image","product-price","product-stock"].forEach(id=>document.getElementById(id).value="")}
+
+function renderAdminBows(){
+ const box=document.getElementById("admin-bows");box.innerHTML="";
+ bows.forEach(b=>{
+  const d=document.createElement("div");d.className="admin-product";d.innerHTML=`<div class="admin-product-title">🎀 ${b.name}</div>
+  <input id="bow-name-${b.id}" value="${b.name}" placeholder="蝴蝶結名稱" style="width:100%;padding:8px;border:1px solid #ff9eb8;margin:5px 0">
+  <input id="bow-image-${b.id}" value="${b.image}" placeholder="圖片網址" style="width:100%;padding:8px;border:1px solid #ff9eb8;margin-bottom:5px">
+  <input id="bow-stock-${b.id}" value="${b.stock}" type="number" min="0" placeholder="庫存" style="width:100%;padding:8px;border:1px solid #ff9eb8">
+  <button class="save-btn" style="margin-top:5px" onclick="saveBow('${b.id}')">💾 儲存蝴蝶結</button>`;box.appendChild(d);
+ });
+}
+function saveBow(id){const b=bows.find(x=>x.id===id);if(!b)return;b.name=document.getElementById("bow-name-"+id).value.trim();b.image=document.getElementById("bow-image-"+id).value.trim();b.stock=Number(document.getElementById("bow-stock-"+id).value);saveBows();renderAdminBows();renderBows();renderSelectionSummary();alert("蝴蝶結已更新！🎀")}
+
+function renderAdminTypes(){
+ const box=document.getElementById("admin-types");box.innerHTML="";
+ types.forEach(t=>{const row=document.createElement("div");row.style.marginBottom="10px";row.innerHTML=`<div style="font-size:12px;font-weight:bold;margin-bottom:4px">${t.name}</div><input type="number" min="0" value="${t.price}" id="type-price-${t.id}" style="width:100%;padding:8px;border:2px solid #ff9eb8"><button class="save-btn" style="margin-top:5px" onclick="saveTypePrice('${t.id}')">💾 儲存價格</button>`;box.appendChild(row)})
+}
+function saveTypePrice(id){const t=types.find(x=>x.id===id);if(!t)return;t.price=Number(document.getElementById("type-price-"+id).value);saveTypes();renderTypes();updateAll();alert("價格已更新！")}
+
+function renderAdminBottles(){
+ const box=document.getElementById("admin-bottles");box.innerHTML="";
+ bottles.forEach(b=>{const row=document.createElement("div");row.className="admin-product";row.innerHTML=`<div class="admin-product-title">🏺 ${b.name}</div>
+ <input id="bottle-name-${b.id}" value="${b.name}" placeholder="瓶子名稱" style="width:100%;padding:8px;border:1px solid #ff9eb8;margin:5px 0">
+ <input id="bottle-image-${b.id}" value="${b.image}" placeholder="圖片網址" style="width:100%;padding:8px;border:1px solid #ff9eb8;margin-bottom:5px">
+ <input id="bottle-stock-${b.id}" value="${b.stock}" type="number" min="0" placeholder="庫存" style="width:100%;padding:8px;border:1px solid #ff9eb8">
+ <button class="save-btn" style="margin-top:5px" onclick="saveBottle('${b.id}')">💾 儲存玻璃瓶</button>`;box.appendChild(row)})
+}
+function saveBottle(id){const b=bottles.find(x=>x.id===id);if(!b)return;b.name=document.getElementById("bottle-name-"+id).value.trim();b.image=document.getElementById("bottle-image-"+id).value.trim();b.stock=Number(document.getElementById("bottle-stock-"+id).value);saveBottles();renderAdminBottles();renderBottles();updateAll();alert("玻璃瓶已更新！")}
+
+async function saveLinks(){
+ links.instagram=document.getElementById("link-ig").value.trim();
+ links.shop=document.getElementById("link-shop").value.trim();
+ links.other=document.getElementById("link-other").value.trim();
+
+ localStorage.setItem("assanLinks",JSON.stringify(links));
+
+ try{
+  let cloudData={};
+
+  const getResponse=await fetch(API_BASE+"/data",{method:"GET"});
+  if(getResponse.ok){
+   const getResult=await getResponse.json();
+   if(getResult&&getResult.success&&getResult.data&&typeof getResult.data==="object"){
+    cloudData=getResult.data;
+   }
+  }
+
+  cloudData.links={...links};
+
+  const postResponse=await fetch(API_BASE+"/data",{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify(cloudData)
+  });
+
+  const postResult=await postResponse.json();
+
+  if(!postResponse.ok||!postResult.success){
+   throw new Error(postResult.message||"雲端儲存失敗");
+  }
+
+  renderLinks();
+  renderInfo();
+  alert("連結已更新！♡");
+ }catch(error){
+  console.error("Cloudflare KV 儲存失敗：",error);
+  renderLinks();
+  renderInfo();
+  alert("連結已更新，但雲端同步失敗，請稍後再試。\n\n錯誤："+error.message);
+ }
+}
+
+async function loadCloudLinks(){
+ try{
+  const response=await fetch(API_BASE+"/data",{method:"GET"});
+  if(!response.ok)return;
+
+  const result=await response.json();
+  if(!result||!result.success||!result.data||typeof result.data!=="object")return;
+
+  const data=result.data;
+  let cloudLinks=null;
+
+  if(data.links&&typeof data.links==="object"){
+   cloudLinks=data.links;
+  }else if(data.type==="links"&&data.data&&typeof data.data==="object"){
+   cloudLinks=data.data;
+  }else if("instagram" in data||"shop" in data||"other" in data){
+   cloudLinks=data;
+  }
+
+  if(cloudLinks){
+   links={
+    instagram:cloudLinks.instagram||"",
+    shop:cloudLinks.shop||"",
+    other:cloudLinks.other||""
+   };
+   localStorage.setItem("assanLinks",JSON.stringify(links));
+  }
+ }catch(error){
+  console.warn("Cloudflare KV 讀取失敗，使用本機資料：",error);
+ }
+
+ renderLinks();
+ renderInfo();
+}
+function saveEvent(){
+ eventData={name:document.getElementById("event-name").value.trim(),date:document.getElementById("event-date").value.trim(),place:document.getElementById("event-place").value.trim(),time:document.getElementById("event-time").value.trim()};
+ localStorage.setItem("assanEvent",JSON.stringify(eventData));renderInfo();alert("擺攤資訊已更新！♡")
+}
+
+renderTypes();renderFlowers();renderBows();renderBottles();renderWorks();updateAll();loadCloudLinks();
+</script>
+</body>
+</html>
