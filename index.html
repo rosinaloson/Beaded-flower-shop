@@ -2,301 +2,77 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Beaded Vase Bouquet - 自助選花小幫手</title>
+    <title>客製化花束小幫手</title>
     <style>
-        :root {
-            --primary-pink: #f4d1d8;
-            --dark-pink: #d996a6;
-            --text-color: #5a4a4e;
-            --bg-color: #fdfbfb;
-            --card-bg: #ffffff;
-            --shadow: 0 4px 15px rgba(217, 150, 166, 0.15);
-        }
+        body { background-color: #ffdce6; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; color: #5c4d50; }
+        .app-container { width: 100%; max-width: 500px; background: white; border: 3px solid #ff9eb8; padding: 15px; border-radius: 8px; box-shadow: 5px 5px 0px #e68fa6; }
+        
+        .card { border: 2px solid #ff9eb8; padding: 15px; margin-bottom: 15px; background: #fffdfd; }
+        h2 { font-size: 16px; border-bottom: 2px solid #ff9eb8; padding-bottom: 5px; color: #d67b91; margin-top: 0; }
+        
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .item { border: 2px solid #ff9eb8; padding: 5px; text-align: center; cursor: pointer; }
+        .item.selected { background-color: #ffdae2; }
+        .item img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border: 1px solid #ff9eb8; display: block; }
+        .item p { font-size: 12px; margin: 5px 0 0 0; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 600px;
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: var(--shadow);
-        }
-
-        h1 {
-            font-size: 24px;
-            text-align: center;
-            color: var(--dark-pink);
-            margin-bottom: 5px;
-        }
-
-        .subtitle {
-            text-align: center;
-            font-size: 14px;
-            color: #8c787c;
-            margin-bottom: 25px;
-        }
-
-        .section-title {
-            font-size: 18px;
-            border-left: 4px solid var(--dark-pink);
-            padding-left: 10px;
-            margin: 25px 0 15px 0;
-        }
-
-        /* 網格選單 */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-
-        .item-card {
-            border: 2px solid #eee;
-            border-radius: 12px;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: #fff;
-            position: relative;
-        }
-
-        .item-card:hover {
-            border-color: var(--primary-pink);
-        }
-
-        .item-card.selected {
-            border-color: var(--dark-pink);
-            background-color: #fff8f9;
-        }
-
-        .item-card img {
-            width: 100%;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .item-name {
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        /* 預覽與輸出結果區 */
-        .output-section {
-            margin-top: 30px;
-            background: #fff4f6;
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px dashed var(--dark-pink);
-        }
-
-        .output-title {
-            font-weight: bold;
-            color: var(--dark-pink);
-            margin-bottom: 10px;
-            font-size: 15px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 110px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 14px;
-            resize: none;
-            background: #fff;
-            box-sizing: border-box;
-            color: var(--text-color);
-        }
-
-        .copy-btn {
-            display: block;
-            width: 100%;
-            background-color: var(--dark-pink);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 12px;
-            transition: background 0.2s;
-        }
-
-        .copy-btn:hover {
-            background-color: #c78292;
-        }
-
-        .limit-hint {
-            font-size: 12px;
-            color: #d9534f;
-            text-align: right;
-            margin-top: 5px;
-        }
+        textarea { width: 100%; height: 100px; border: 2px solid #ff9eb8; margin-top: 10px; padding: 10px; box-sizing: border-box; }
+        button { width: 100%; background: #d67b91; color: white; border: none; padding: 10px; margin-top: 10px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Custom Beaded Vase Bouquet</h1>
-    <div class="subtitle">選擇你喜歡的花朵、蝴蝶結與玻璃瓶，客製專屬花束</div>
-
-    <!-- 1. 選擇花朵 -->
-    <div class="section-title">選擇花朵 (最多 5 支)</div>
-    <div class="grid" id="flowers-grid">
-        <!-- 程式會自動生成花朵選項 (代號 1 ~ 15) -->
+<div class="app-container">
+    <div class="card">
+        <h2>🌸 選擇花朵 (選5支)</h2>
+        <div class="grid" id="flower-grid"></div>
     </div>
-    <div class="limit-hint" id="flower-limit-hint">已選擇 0 / 5 支</div>
-
-    <!-- 2. 選擇蝴蝶結 -->
-    <div class="section-title">選擇蝴蝶結 (單選)</div>
-    <div class="grid" id="bows-grid">
-        <!-- 程式會自動生成蝴蝶結選項 -->
+    <div class="card">
+        <h2>🎀 選擇蝴蝶結</h2>
+        <div class="grid" id="bow-grid"></div>
     </div>
-
-    <!-- 3. 選擇玻璃瓶 -->
-    <div class="section-title">選擇玻璃瓶 (單選)</div>
-    <div class="grid" id="bottles-grid">
-        <!-- 程式會自動生成玻璃瓶選項 -->
+    <div class="card">
+        <h2>🏺 選擇玻璃瓶</h2>
+        <div class="grid" id="bottle-grid"></div>
     </div>
-
-    <!-- 結果輸出區 -->
-    <div class="output-section">
-        <div class="output-title">✨ 您的訂購文字（複製後直接傳給闆娘）</div>
-        <textarea id="result-text" readonly></textarea>
-        <button class="copy-btn" onclick="copyText()">一鍵複製訂購文字</button>
+    <div class="card">
+        <h2>✨ 訂購文字</h2>
+        <textarea id="output" readonly></textarea>
+        <button onclick="copyText()">複製文字傳給闆娘</button>
     </div>
 </div>
 
 <script>
-    // 示範資料：你可以隨時修改圖片網址與名稱
-    // 花朵 1~15
-    const flowers = Array.from({ length: 15 }, (_, i) => ({
-        id: i + 1,
-        name: `花朵 #${i + 1}`,
-        img: "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=200&auto=format&fit=crop&q=80" // 替代圖片網址，可換成你的商品圖
-    }));
-
-    // 蝴蝶結 1~4
-    const bows = Array.from({ length: 4 }, (_, i) => ({
-        id: i + 1,
-        name: `蝴蝶結 #${i + 1}`,
-        img: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=200&auto=format&fit=crop&q=80"
-    }));
-
-    // 玻璃瓶 1~4
-    const bottles = Array.from({ length: 4 }, (_, i) => ({
-        id: i + 1,
-        name: `玻璃瓶 #${i + 1}`,
-        img: "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=200&auto=format&fit=crop&q=80"
-    }));
-
-    let selectedFlowers = []; // 儲存選中的花朵ID
-    let selectedBow = null;   // 儲存選中的蝴蝶結ID
-    let selectedBottle = null;// 儲存選中的玻璃瓶ID
-
-    // 初始化渲染介面
-    function render() {
-        // 渲染花朵
-        const flowerContainer = document.getElementById('flowers-grid');
-        flowerContainer.innerHTML = flowers.map(f => `
-            <div class="item-card ${selectedFlowers.includes(f.id) ? 'selected' : ''}" onclick="toggleFlower(${f.id})">
-                <img src="${f.img}" alt="${f.name}">
-                <div class="item-name">${f.name}</div>
-            </div>
-        `).join('');
-
-        document.getElementById('flower-limit-hint').innerText = `已選擇 ${selectedFlowers.length} / 5 支`;
-
-        // 渲染蝴蝶結
-        const bowContainer = document.getElementById('bows-grid');
-        bowContainer.innerHTML = bows.map(b => `
-            <div class="item-card ${selectedBow === b.id ? 'selected' : ''}" onclick="selectBow(${b.id})">
-                <img src="${b.img}" alt="${b.name}">
-                <div class="item-name">${b.name}</div>
-            </div>
-        `).join('');
-
-        // 渲染玻璃瓶
-        const bottleContainer = document.getElementById('bottles-grid');
-        bottleContainer.innerHTML = bottles.map(b => `
-            <div class="item-card ${selectedBottle === b.id ? 'selected' : ''}" onclick="selectBottle(${b.id})">
-                <img src="${b.img}" alt="${b.name}">
-                <div class="item-name">${b.name}</div>
-            </div>
-        `).join('');
-
-        updateResultText();
-    }
-
-    // 點擊花朵（多選，上限5支）
-    function toggleFlower(id) {
-        if (selectedFlowers.includes(id)) {
-            selectedFlowers = selectedFlowers.filter(fId => fId !== id);
-        } else {
-            if (selectedFlowers.length >= 5) {
-                alert('最多只能選擇 5 支花喔！');
-                return;
-            }
-            selectedFlowers.push(id);
+    const createItems = (count, prefix, containerId, isMulti) => {
+        const container = document.getElementById(containerId);
+        for(let i=1; i<=count; i++) {
+            let div = document.createElement('div');
+            div.className = 'item';
+            div.innerHTML = `<img src="https://picsum.photos/200?random=${i+prefix}"><p>${prefix}${i}號</p>`;
+            div.onclick = () => {
+                div.classList.toggle('selected');
+                updateText();
+            };
+            container.appendChild(div);
         }
-        render();
+    };
+
+    function updateText() {
+        let flowers = Array.from(document.querySelectorAll('#flower-grid .selected')).map(el => el.innerText.replace('花','').replace('號',''));
+        let bow = document.querySelector('#bow-grid .selected')?.innerText.replace('蝴蝶結','').replace('號','');
+        let bottle = document.querySelector('#bottle-grid .selected')?.innerText.replace('玻璃瓶','').replace('號','');
+        document.getElementById('output').value = `我想要這些花${flowers.join(',')}\n蝴蝶結要${bow||'？'}號\n玻璃瓶要${bottle||'？'}號\n謝謝你!`;
     }
 
-    // 點擊蝴蝶結（單選）
-    function selectBow(id) {
-        selectedBow = (selectedBow === id) ? null : id;
-        render();
-    }
-
-    // 點擊玻璃瓶（單選）
-    function selectBottle(id) {
-        selectedBottle = (selectedBottle === id) ? null : id;
-        render();
-    }
-
-    // 更新文字框內容
-    function updateResultText() {
-        let flowerStr = selectedFlowers.length > 0 ? selectedFlowers.join(',') : '尚未選擇';
-        let bowStr = selectedBow ? `${selectedBow}號` : '尚未選擇';
-        let bottleStr = selectedBottle ? `${selectedBottle}號` : '尚未選擇';
-
-        let text = `我想要這些花${flowerStr}\n蝴蝶結要${bowStr}\n玻璃瓶要${bottleStr}\n謝謝你!`;
-        
-        // 如果全部沒選顯示提示，否則顯示格式化文字
-        document.getElementById('result-text').value = text;
-    }
-
-    // 複製文字功能
     function copyText() {
-        const textarea = document.getElementById('result-text');
-        if (selectedFlowers.length === 0 || !selectedBow || !selectedBottle) {
-            alert('請完整選擇花朵、蝴蝶結與玻璃瓶後再複製喔！');
-            return;
-        }
-        textarea.select();
+        document.getElementById('output').select();
         document.execCommand('copy');
-        alert('已成功複製訂購文字！快貼給闆娘吧 💕');
+        alert('已複製！');
     }
 
-    // 初始執行
-    render();
+    createItems(15, '花', 'flower-grid');
+    createItems(4, '蝴蝶結', 'bow-grid');
+    createItems(4, '玻璃瓶', 'bottle-grid');
 </script>
-
 </body>
 </html>
