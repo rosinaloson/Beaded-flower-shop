@@ -91,7 +91,7 @@ h2{color:#d06783;font-size:20px;margin:5px 0 10px}h3{color:#d06783;font-size:14p
 <div class="header"><span>♥ 阿桑的串珠花店</span><span>✿</span></div>
 <div class="tabs">
 <button class="tab active" onclick="showPage('home',this)">🌿首頁</button>
-<button class="tab" onclick="showPage('shop',this)">🌷自選花</button>
+<button class="tab" onclick="showPage('shop',this)">🌷選花</button>
 <button class="tab" onclick="showPage('works',this)">🎀作品</button>
 <button class="tab" onclick="showPage('info',this)">💌資訊</button>
 <button class="tab" onclick="showPage('admin',this)">🗝️後台</button>
@@ -117,10 +117,10 @@ h2{color:#d06783;font-size:20px;margin:5px 0 10px}h3{color:#d06783;font-size:14p
 <div class="home-flower">🌷</div>
 <h2 style="text-align:center">阿桑的串珠花店</h2>
 <div class="home-text">歡迎來到阿桑的串珠花店 ♡<br>自己挑喜歡的花朵，<br>組成只屬於你的串珠花束！</div>
-<button class="main-button" onclick="goShop()">🌸 開始自選花束</button>
+<button class="main-button" onclick="goShop()">🌸 開始自選花束！</button>
 </div>
 </div>
-<div class="card"><h3>🛍️ 下單方式</h3><div class="notice">① 在這裡選好你的花束<br>② 確認最下面的「我的選擇」<br>③ 複製訂購文字<br>④ 前往賣貨便下單<br>⑤ 把訂購文字貼到訂單提問區給阿桑 ♡</div><div id="home-links"></div></div>
+<div class="card"><h3>🛍️ 下單方式</h3><div class="notice">① 在這裡選好你的花束<br>② 確認最下面的「我的選擇」<br>③ 複製訂購文字<br>④ 前往賣貨便下單對應的品項<br>⑤ 把訂購文字貼到訂單提問區給阿桑(多支花束需分次貼喔~) ♡</div><div id="home-links"></div></div>
 </div>
 
 <div class="page" id="shop">
@@ -146,7 +146,7 @@ h2{color:#d06783;font-size:20px;margin:5px 0 10px}h3{color:#d06783;font-size:14p
 </div>
 
 <div class="card" id="bottle-section" style="display:none">
-<h3>④ 🏺 選擇玻璃瓶</h3>
+<h3>④ 🫙 選擇玻璃瓶</h3>
 <div class="notice">花瓶款一定要選一個玻璃瓶喔！</div>
 <div class="bottle-grid" id="bottle-grid"></div>
 </div>
@@ -207,7 +207,7 @@ h2{color:#d06783;font-size:20px;margin:5px 0 10px}h3{color:#d06783;font-size:14p
 🎀 蝴蝶結
 1號蝴蝶結
 
-🏺 玻璃瓶
+🫙 玻璃瓶
 透明圓瓶"></textarea>
 <div class="pickup-actions">
 <button class="pickup-parse" onclick="parsePickupOrder()">🧺 開始圖片揀貨</button>
@@ -261,7 +261,7 @@ h2{color:#d06783;font-size:20px;margin:5px 0 10px}h3{color:#d06783;font-size:14p
 </div>
 
 <div class="admin-section">
-<h3>🏺 玻璃瓶管理</h3>
+<h3>🫙 玻璃瓶管理</h3>
 <div class="admin-help">所有玻璃瓶可以一起修改，最後只按一次「儲存全部玻璃瓶」。</div>
 <div id="admin-bottles" class="admin-item-list"></div>
 <button class="save-btn admin-save-all" onclick="saveAllBottles()">💾 儲存全部玻璃瓶</button>
@@ -440,7 +440,7 @@ function changeQuantity(id,change){
 function renderBows(){
  const box=document.getElementById("bow-grid"),help=document.getElementById("bow-help");box.innerHTML="";
  if(!selectedType){help.textContent="請先選擇款式與花朵 ♡";return}
- help.textContent="🎀 請選一個蝴蝶結，選好後會出現在下方總覽 ♡";
+ help.textContent="🎀 請選一個蝴蝶結 ♡";
  bows.forEach(bow=>{
   const soldout=bow.stock<=0,div=document.createElement("div");
   div.className="bow "+(selectedBow?.id===bow.id?"active":"");if(soldout)div.style.opacity=".5";
