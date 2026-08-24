@@ -1334,9 +1334,9 @@ function parsePickupOrder(){
 
  pickupItems=[];
  // 賣貨便貼回來時可能把原本多行訂單合併成一行，先依既有欄位標記切回各段。
- const normalizedInput=input
+const normalizedInput=input
   .replace(/(?:&#x20;|&nbsp;)/gi," ")
-  .replace(/\s*(?=(?:🌸\s*花朵|🎀\s*蝴蝶結|🔑\s*(?:鑰匙圈|圈)|(?:🫙|🏺)\s*玻璃瓶|💰\s*金額)\s*[：:])/g,"\n");
+  .replace(/\s*(?=(?:🌸(?:\s*花朵)?|🎀(?:\s*蝴蝶結)?|🔑(?:\s*(?:鑰匙圈|圈))?|(?:🫙|🏺)(?:\s*玻璃瓶)?|綁|💰(?:\s*金額)?|(?:\$|\b\d+元\b))\s*[：:]?)/g,"\n");
  const lines=normalizedInput.split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
 
  // 🌸 花朵：支援精簡格式「🌸A01×1、A02×1」及舊格式
